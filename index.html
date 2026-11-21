@@ -1224,7 +1224,13 @@
       font-weight: 700;
     }
 
-    #scratchCv {
+    /* Pick & Scratch */
+    .grid.scard-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .pcard.chosen { transform: translateY(-6px) scale(1.08); z-index: 2; }
+    .pcard.chosen .back { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent), 0 10px 22px rgba(0, 0, 0, 0.4); }
+    .scard-big { width: 100%; display: flex; justify-content: center; }
+
+    #scratchCv, #scardCv {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -1909,6 +1915,7 @@
         <button class="chip" data-game="knockout"><span class="ico" aria-hidden="true">💥</span><span class="gname"></span></button>
         <button class="chip" data-game="race"><span class="ico" aria-hidden="true">🏁</span><span class="gname"></span></button>
         <button class="chip" data-game="scratch"><span class="ico" aria-hidden="true">🎫</span><span class="gname"></span></button>
+        <button class="chip" data-game="scard"><span class="ico" aria-hidden="true">🎟️</span><span class="gname"></span></button>
         <button class="chip" data-game="teams"><span class="ico" aria-hidden="true">👥</span><span class="gname"></span></button>
         <button class="chip" data-game="order"><span class="ico" aria-hidden="true">🔢</span><span class="gname"></span></button>
         <button class="chip" data-game="slots"><span class="ico" aria-hidden="true">🎰</span><span class="gname"></span></button>
@@ -2012,6 +2019,17 @@
             <div class="ticket">
               <div class="prize2" id="ticketPrize"></div>
               <canvas id="scratchCv" aria-label="Scratch area"></canvas>
+            </div>
+          </div>
+
+          <!-- Pick & Scratch -->
+          <div class="stage" id="stage-scard" hidden>
+            <div class="grid cards scard-grid felt-surface" id="scardGrid"></div>
+            <div class="scard-big" id="scardBig" hidden>
+              <div class="ticket">
+                <div class="prize2" id="scardPrize"></div>
+                <canvas id="scardCv" aria-label="Scratch your card"></canvas>
+              </div>
             </div>
           </div>
 
@@ -2228,7 +2246,7 @@
       const THEME_ICONS = { dark: "🌙", light: "☀️", neon: "⚡" };
 
       const ICONS = {
-        wheel: "🎡", knockout: "💥", race: "🏁", scratch: "🎫", teams: "👥",
+        wheel: "🎡", knockout: "💥", race: "🏁", scratch: "🎫", scard: "🎟️", teams: "👥",
         order: "🔢", slots: "🎰", three: "🃏", cards: "🎴", bottle: "🍾",
         boxes: "🎁", dice: "🎲", coin: "🪙", number: "#️⃣"
       };
@@ -2264,6 +2282,8 @@
           teamsOpt: (n) => n + " teams", diceOpt: (n) => n === 1 ? "1 die" : n + " dice",
           addToPlay: "Add names or photos to play", addTwo: "Add at least 2 items to play",
           scratchHere: "SCRATCH HERE", scratchSub: "Rub to reveal the winner", winner: "Winner",
+          scardPick: "Choose one card", scardScratch: "Scratch your card to see what you chose", yourCard: "Your card",
+          scardWait: "Tap SHUFFLE & HIDE first",
           spinning: "Spinning…", rolling: "Rolling…", shuffling: "Shuffling…", mixing: "Mixing…",
           flipping: "Flipping…", picking: "Picking…", makingTeams: "Making teams…",
           offRace: "And they're off!", rememberCards: "Remember the cards…", pickACard: "Which one? Tap a card.",
@@ -2286,6 +2306,7 @@
             knockout: { title: "Knockout", action: "SPIN TO KNOCK OUT", picked: "Last one standing",       idle: "Each spin knocks one out. Last one wins." },
             race:     { title: "Race",     action: "START THE RACE",    picked: "First across the line",   idle: "First runner across the line wins" },
             scratch:  { title: "Scratch",  action: "NEW TICKET",        picked: "Your ticket says",        idle: "Rub the silver foil to reveal" },
+            scard:    { title: "Pick & Scratch", action: "SHUFFLE & HIDE", picked: "You chose",            idle: "Here are all your cards. Tap SHUFFLE & HIDE." },
             teams:    { title: "Teams",    action: "MAKE TEAMS",        picked: "",                        idle: "Choose team count, then deal" },
             order:    { title: "Order",    action: "SHUFFLE ORDER",     picked: "",                        idle: "Ranks your whole list randomly" },
             slots:    { title: "Slots",    action: "PULL",              picked: "The slot machine picked", idle: "Pull the lever to spin the reel" },
@@ -2328,6 +2349,8 @@
           teamsOpt: (n) => n + " فرق", diceOpt: (n) => n === 1 ? "نرد واحد" : n === 2 ? "نردان" : n + " نردات",
           addToPlay: "أضف أسماء أو صوراً للبدء", addTwo: "أضف عنصرين على الأقل للعب",
           scratchHere: "اخدش هنا", scratchSub: "امسح الطبقة الفضية للكشف", winner: "الفائز",
+          scardPick: "اختر بطاقة واحدة", scardScratch: "اكشط بطاقتك لترى ما اخترت", yourCard: "بطاقتك",
+          scardWait: "اضغط اخلط وأخفِ أولاً",
           spinning: "جارٍ الدوران…", rolling: "جارٍ السحب…", shuffling: "جارٍ الخلط…", mixing: "جارٍ التحريك…",
           flipping: "جارٍ الرمي…", picking: "جارٍ الاختيار…", makingTeams: "جارٍ توزيع الفرق…",
           offRace: "انطلق السباق!", rememberCards: "تذكر أماكن البطاقات…", pickACard: "أي بطاقة؟ اضغط لاختيار واحدة.",
@@ -2350,6 +2373,7 @@
             knockout: { title: "الإقصاء",  action: "أدر للإقصاء",     picked: "آخر من بقي",         idle: "كل دورة تقصي واحداً والأخير يفوز" },
             race:     { title: "السباق",   action: "ابدأ السباق",     picked: "الأول في خط النهاية", idle: "أول متسابق يعبر الخط يفوز" },
             scratch:  { title: "اكشط",     action: "بطاقة جديدة",     picked: "تقول بطاقتك",        idle: "امسح الطبقة الفضية للكشف عن الفائز" },
+            scard:    { title: "اختر واكشط", action: "اخلط وأخفِ",    picked: "لقد اخترت",          idle: "هذه كل بطاقاتك. اضغط اخلط وأخفِ." },
             teams:    { title: "الفرق",    action: "كوّن الفرق",      picked: "",                   idle: "اختر عدد الفرق ثم اضغط للتوزيع" },
             order:    { title: "الترتيب",  action: "رتّب عشوائياً",   picked: "",                   idle: "يرتب قائمتك بالكامل بشكل عشوائي" },
             slots:    { title: "البكرة",   action: "اسحب الذراع",     picked: "اختارت البكرة",      idle: "اسحب الذراع لتدوير البكرة" },
@@ -2845,89 +2869,194 @@
         }
       }
 
-      // ---------- Scratch Card ----------
-      const sc = $("scratchCv"), sctx = sc.getContext("2d");
-      let ticketItem = null, scratchDone = false, scratching = false, scratchMoves = 0, lastPt = null;
+      // ---------- Scratch Card (shared foil) ----------
+      function makeScratch(cv, opts) {
+        const ctx = cv.getContext("2d");
+        let on = false, last = null, moves = 0, done = true;
+        function draw() {
+          done = false; on = false; last = null;
+          const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+          cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.globalCompositeOperation = "source-over";
+          const g = ctx.createLinearGradient(0, 0, w, h);
+          g.addColorStop(0, "#b8bcc8"); g.addColorStop(0.5, "#e6e8ef"); g.addColorStop(1, "#9ca1ae");
+          ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+          for (let i = 0; i < 180; i++) {
+            ctx.fillStyle = "rgba(255,255,255," + (Math.random() * 0.65).toFixed(2) + ")";
+            ctx.fillRect(Math.random() * w, Math.random() * h, 2, 2);
+          }
+          const fDisp = state.lang === "ar" ? "Cairo" : "'Bricolage Grotesque'";
+          const fBody = state.lang === "ar" ? "Cairo" : "Figtree";
+          ctx.fillStyle = "rgba(50, 54, 70, 0.68)";
+          ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.font = "800 24px " + fDisp + ", system-ui, sans-serif";
+          ctx.fillText(t().scratchHere, w / 2, h / 2 - 8);
+          ctx.font = "600 13px " + fBody + ", system-ui, sans-serif";
+          ctx.fillText(t().scratchSub, w / 2, h / 2 + 18);
+        }
+        function at(e) {
+          const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+          ctx.globalCompositeOperation = "destination-out";
+          ctx.fillStyle = "#000"; ctx.strokeStyle = "#000"; ctx.lineWidth = 44; ctx.lineCap = "round";
+          ctx.beginPath(); ctx.arc(x, y, 22, 0, TAU); ctx.fill();
+          if (last) { ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(x, y); ctx.stroke(); }
+          last = { x, y };
+          if (++moves % 5 === 0) { tone(2200 + Math.random() * 900, 0.02, "sawtooth", 0.012); check(); }
+        }
+        function check() {
+          const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
+          let clear = 0, total = 0;
+          for (let i = 3; i < d.length; i += 4 * 37) { total++; if (d[i] === 0) clear++; }
+          if (total && clear / total > 0.5) finish();
+        }
+        function finish() {
+          if (done) return;
+          done = true; on = false;
+          ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+          opts.onReveal();
+        }
+        cv.addEventListener("pointerdown", (e) => {
+          if (done || busy || !opts.ready()) return;
+          audio(); on = true; last = null;
+          try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+          at(e);
+        });
+        cv.addEventListener("pointermove", (e) => { if (on) at(e); });
+        ["pointerup", "pointercancel", "pointerleave"].forEach((ev) =>
+          cv.addEventListener(ev, () => { on = false; last = null; })
+        );
+        return { draw };
+      }
+
+      function fillPrize(prize, item, caption) {
+        prize.innerHTML = ""; prize.style.fontSize = "";
+        const s = document.createElement("small"); s.textContent = caption; prize.appendChild(s);
+        if (item.type === "photo") {
+          const im = document.createElement("img"); im.src = item.value; im.alt = ""; prize.appendChild(im);
+        }
+        if (item.type !== "photo" || item.name) {
+          const d = document.createElement("div"); d.dir = "auto"; d.textContent = label(item); prize.appendChild(d);
+        }
+      }
+
+      const sc = $("scratchCv");
+      let ticketItem = null;
+      const ticketFoil = makeScratch(sc, {
+        ready: () => !!ticketItem,
+        onReveal: () => {
+          busy = true; refreshAction();
+          const idx = items().indexOf(ticketItem);
+          setTimeout(() => finishWin(idx), 550);
+        }
+      });
 
       function newTicket() {
         if (busy) return;
         const arr = items(), prize = $("ticketPrize");
-        prize.innerHTML = ""; scratchDone = false;
+        prize.innerHTML = "";
         if (!arr.length) {
           ticketItem = null; sc.hidden = true;
           prize.style.fontSize = "16px"; prize.textContent = t().addToPlay;
           return;
         }
-        prize.style.fontSize = ""; sc.hidden = false;
+        sc.hidden = false;
         ticketItem = arr[weightedRandIndex(arr)];
-        const s = document.createElement("small"); s.textContent = t().winner; prize.appendChild(s);
-        if (ticketItem.type === "photo") {
-          const im = document.createElement("img"); im.src = ticketItem.value; im.alt = ""; prize.appendChild(im);
-        }
-        if (ticketItem.type !== "photo" || ticketItem.name) {
-          const d = document.createElement("div"); d.dir = "auto"; d.textContent = label(ticketItem); prize.appendChild(d);
-        }
-        drawSilver();
+        fillPrize(prize, ticketItem, t().winner);
+        ticketFoil.draw();
         setStatus(gMeta("scratch").idle);
       }
 
-      function drawSilver() {
-        const w = sc.clientWidth, h = sc.clientHeight; if (!w || !h) return;
-        sc.width = Math.round(w * dpr); sc.height = Math.round(h * dpr);
-        sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        sctx.globalCompositeOperation = "source-over";
-        const g = sctx.createLinearGradient(0, 0, w, h);
-        g.addColorStop(0, "#b8bcc8"); g.addColorStop(0.5, "#e6e8ef"); g.addColorStop(1, "#9ca1ae");
-        sctx.fillStyle = g; sctx.fillRect(0, 0, w, h);
-        for (let i = 0; i < 180; i++) {
-          sctx.fillStyle = "rgba(255,255,255," + (Math.random() * 0.65).toFixed(2) + ")";
-          sctx.fillRect(Math.random() * w, Math.random() * h, 2, 2);
+      // ---------- Pick & Scratch ----------
+      // Every item is shown face up, then hidden and shuffled. The player picks one and scratches it.
+      const MAX_SCARDS = 40;
+      let scard = { deck: [], phase: "show", item: null };
+      const scardFoil = makeScratch($("scardCv"), {
+        ready: () => scard.phase === "scratch" && !!scard.item,
+        onReveal: () => {
+          scard.phase = "done"; busy = true; refreshAction();
+          const idx = items().indexOf(scard.item);
+          setTimeout(() => finishWin(idx), 550);
         }
-        const fDisp = state.lang === "ar" ? "Cairo" : "'Bricolage Grotesque'";
-        const fBody = state.lang === "ar" ? "Cairo" : "Figtree";
-        sctx.fillStyle = "rgba(50, 54, 70, 0.68)";
-        sctx.textAlign = "center"; sctx.textBaseline = "middle";
-        sctx.font = "800 24px " + fDisp + ", system-ui, sans-serif";
-        sctx.fillText(t().scratchHere, w / 2, h / 2 - 8);
-        sctx.font = "600 13px " + fBody + ", system-ui, sans-serif";
-        sctx.fillText(t().scratchSub, w / 2, h / 2 + 18);
-      }
-
-      function scratchAt(e) {
-        const r = sc.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-        sctx.globalCompositeOperation = "destination-out";
-        sctx.fillStyle = "#000"; sctx.strokeStyle = "#000"; sctx.lineWidth = 44; sctx.lineCap = "round";
-        sctx.beginPath(); sctx.arc(x, y, 22, 0, TAU); sctx.fill();
-        if (lastPt) { sctx.beginPath(); sctx.moveTo(lastPt.x, lastPt.y); sctx.lineTo(x, y); sctx.stroke(); }
-        lastPt = { x, y };
-        if (++scratchMoves % 5 === 0) { tone(2200 + Math.random() * 900, 0.02, "sawtooth", 0.012); checkScratch(); }
-      }
-
-      function checkScratch() {
-        const d = sctx.getImageData(0, 0, sc.width, sc.height).data;
-        let clear = 0, total = 0;
-        for (let i = 3; i < d.length; i += 4 * 37) { total++; if (d[i] === 0) clear++; }
-        if (total && clear / total > 0.5) revealTicket();
-      }
-
-      function revealTicket() {
-        if (scratchDone || !ticketItem) return;
-        scratchDone = true; scratching = false; busy = true; refreshAction();
-        sctx.setTransform(1, 0, 0, 1, 0, 0); sctx.clearRect(0, 0, sc.width, sc.height);
-        const idx = items().indexOf(ticketItem);
-        setTimeout(() => finishWin(idx), 550);
-      }
-
-      sc.addEventListener("pointerdown", (e) => {
-        if (scratchDone || busy || !ticketItem) return;
-        audio(); scratching = true; lastPt = null;
-        try { sc.setPointerCapture(e.pointerId); } catch (err) {}
-        scratchAt(e);
       });
-      sc.addEventListener("pointermove", (e) => { if (scratching) scratchAt(e); });
-      ["pointerup", "pointercancel", "pointerleave"].forEach((ev) =>
-        sc.addEventListener(ev, () => { scratching = false; lastPt = null; })
-      );
+
+      function scardSetup() {
+        const arr = items();
+        scard.deck = arr.length > MAX_SCARDS ? shuffled(weightedShuffle(arr).slice(0, MAX_SCARDS)) : arr.slice();
+        scard.phase = "show"; scard.item = null;
+        $("scardBig").hidden = true; $("scardGrid").hidden = false;
+        paintScard(true);
+      }
+
+      function paintScard(faceUp) {
+        const grid = $("scardGrid");
+        grid.innerHTML = "";
+        if (!scard.deck.length) {
+          const p = document.createElement("div"); p.className = "empty"; p.style.gridColumn = "1 / -1";
+          p.textContent = t().addToPlay; grid.appendChild(p); return;
+        }
+        scard.deck.forEach((item, i) => {
+          const b = document.createElement("button");
+          b.className = "pick pcard" + (faceUp ? " open" : "");
+          b.setAttribute("aria-label", "Card " + (i + 1));
+          const inner = document.createElement("div"); inner.className = "inner";
+          const back = document.createElement("div"); back.className = "back";
+          const face = document.createElement("div"); face.className = "face"; face.appendChild(itemNode(item));
+          inner.append(back, face); b.appendChild(inner);
+          b.onclick = () => scardChoose(i, b);
+          grid.appendChild(b);
+        });
+      }
+
+      function scardShuffle(showMs) {
+        if (busy || !items().length) return;
+        busy = true; refreshAction();
+        const reduce = reduceMotion();
+        const wasShown = scard.phase === "show";
+        if (!wasShown) scardSetup();
+        setStatus(gMeta("scard").idle);
+        const wait = showMs != null ? showMs : (wasShown ? 150 : 1100);
+        setTimeout(() => {
+          Array.from($("scardGrid").children).forEach((el) => el.classList.remove("open"));
+          tone(500, 0.08, "triangle", 0.08);
+          setTimeout(() => {
+            setStatus(t().shuffling);
+            scard.deck = shuffled(scard.deck);
+            paintScard(false);
+            Array.from($("scardGrid").children).forEach((el) => {
+              el.style.setProperty("--dx", (Math.random() * 120 - 60) + "px");
+              el.style.setProperty("--dy", (Math.random() * 80 - 40) + "px");
+              el.style.setProperty("--rot", (Math.random() * 40 - 20) + "deg");
+              if (!reduce) el.classList.add("shuffle");
+            });
+            for (let k = 0; k < 8; k++) setTimeout(clack, k * 95);
+            setTimeout(() => {
+              scard.phase = "pick"; busy = false; refreshAction();
+              setStatus(t().scardPick);
+            }, reduce ? 200 : 920);
+          }, reduce ? 50 : 600);
+        }, reduce ? Math.min(wait, 300) : wait);
+      }
+
+      function scardChoose(i, el) {
+        if (busy) return;
+        if (scard.phase !== "pick") { if (scard.phase === "show") setStatus(t().scardWait); return; }
+        // Faces are hidden, so the weighted winner is placed under the chosen card.
+        const arr = scard.deck, w = weightedRandIndex(arr);
+        if (w !== i) [arr[i], arr[w]] = [arr[w], arr[i]];
+        scard.item = arr[i]; scard.phase = "chosen";
+        busy = true; refreshAction();
+        audio(); tone(660, 0.12, "triangle", 0.1); buzz(20);
+        el.classList.add("chosen");
+        Array.from(el.parentNode.children).forEach((c) => { if (c !== el) { c.classList.add("dim"); c.disabled = true; } });
+        setTimeout(() => {
+          $("scardGrid").hidden = true; $("scardBig").hidden = false;
+          fillPrize($("scardPrize"), scard.item, t().yourCard);
+          scard.phase = "scratch"; busy = false; refreshAction();
+          scardFoil.draw();
+          setStatus(t().scardScratch);
+        }, reduceMotion() ? 150 : 700);
+      }
 
       // ---------- Race ----------
       let raceField = [];
@@ -3551,6 +3680,7 @@
         const g = state.game;
         if (g === "wheel" || g === "knockout") spinWheel();
         else if (g === "scratch") newTicket();
+        else if (g === "scard") scardShuffle();
         else if (g === "teams") makeTeams();
         else if (g === "race") raceGo();
         else if (g === "order") makeOrder();
@@ -3602,6 +3732,7 @@
         bottleHit = -1;
         if (g === "slots") resetStrip();
         if (g === "cards" || g === "boxes") dealGrid(g);
+        if (g === "scard") scardSetup();
         if (g === "dice") setDiceCount(state.diceCount);
         if (g === "knockout") resetKo(); else paintKo();
         if (g === "teams") teamsPlaceholder();
@@ -3624,6 +3755,7 @@
         if (g === "order") orderPlaceholder();
         if (g === "three") threePlaceholder();
         if (g === "scratch") newTicket();
+        if (g === "scard") scardSetup();
         if (g === "slots") resetStrip();
         if (g === "cards" || g === "boxes") dealGrid(g);
         bottleHit = -1;
@@ -4164,7 +4296,9 @@
         closePopup();
         if (!items().length) return;
         const g = state.game;
-        if (g === "cards" || g === "boxes") mix(g); else play();
+        if (g === "cards" || g === "boxes") mix(g);
+        else if (g === "scard") scardShuffle(1200);
+        else play();
       };
       $("keepBtn").onclick = () => {
         if (lastWin && lastWin.removed) {
