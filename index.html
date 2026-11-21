@@ -264,84 +264,146 @@
       background: color-mix(in srgb, var(--accent) 12%, var(--bg-surface));
     }
 
-    /* Game Selector Ribbon */
-    .games-wrap {
-      position: relative;
-      margin-inline: -4px;
+    /* Game Selector: bar + side panel */
+    .game-bar { display: flex; }
+
+    .game-open {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 8px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--fg);
+      font: inherit;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      text-align: start;
+    }
+    .game-open:active { transform: scale(0.99); }
+    .game-open .burger { font-size: 18px; color: var(--accent); }
+    .game-open .ico { font-size: 18px; }
+    .game-open .cur { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .game-open .more { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+
+    .drawer-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(0, 0, 0, 0.5);
     }
 
-    .games-wrap::before,
-    .games-wrap::after {
-      content: "";
-      position: absolute;
+    .drawer {
+      position: fixed;
       top: 0;
       bottom: 0;
-      width: 22px;
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    .games-wrap::before {
       inset-inline-start: 0;
-      background: linear-gradient(90deg, var(--bg), transparent);
+      z-index: 31;
+      width: min(300px, 84vw);
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-surface);
+      border-inline-end: 1px solid var(--border);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.45);
+      padding: max(14px, env(safe-area-inset-top, 0px)) 12px max(14px, env(safe-area-inset-bottom, 0px));
+      transform: translateX(-105%);
+      transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+      visibility: hidden;
     }
+    html[dir="rtl"] .drawer { transform: translateX(105%); }
+    .drawer.open, html[dir="rtl"] .drawer.open { transform: none; visibility: visible; }
 
-    .games-wrap::after {
-      inset-inline-end: 0;
-      background: linear-gradient(270deg, var(--bg), transparent);
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 4px 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
     }
-
-    html[dir="rtl"] .games-wrap::before {
-      background: linear-gradient(270deg, var(--bg), transparent);
-    }
-
-    html[dir="rtl"] .games-wrap::after {
-      background: linear-gradient(90deg, var(--bg), transparent);
-    }
+    .drawer-head h2 { margin: 0; font-family: var(--display); font-size: 20px; }
 
     .games {
       display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding: 4px 12px;
-      scroll-behavior: smooth;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      padding: 4px 2px;
+      scrollbar-width: thin;
     }
-
-    .games::-webkit-scrollbar { display: none; }
 
     .chip {
       flex: none;
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 7px;
-      border-radius: 999px;
-      padding: 8px 14px;
+      gap: 12px;
+      width: 100%;
+      border-radius: 14px;
+      padding: 11px 14px;
+      font: inherit;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 15px;
       cursor: pointer;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      background: var(--bg-surface);
-      transition: background 0.16s, color 0.16s, border-color 0.16s, transform 0.12s, box-shadow 0.2s;
-    }
-
-    .chip .ico { font-size: 15px; line-height: 1; }
-
-    .chip:hover:not(.on) {
+      border: 1px solid transparent;
       color: var(--fg);
-      background: var(--bg-elevated);
-      border-color: var(--border-strong);
-      transform: translateY(-1px);
+      background: transparent;
+      text-align: start;
+      transition: background 0.16s, color 0.16s, border-color 0.16s;
     }
+
+    .chip .ico { font-size: 20px; line-height: 1; width: 26px; text-align: center; }
+    .chip .gname { flex: 1; }
+    .chip .p2 {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid var(--border-strong);
+      color: var(--muted);
+    }
+
+    .chip:hover:not(.on) { background: var(--bg-elevated); border-color: var(--border); }
 
     .chip.on {
       background: linear-gradient(180deg, var(--accent), var(--accent-2));
       color: var(--accent-ink);
-      border-color: transparent;
       font-weight: 700;
-      box-shadow: 0 6px 20px -4px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      box-shadow: 0 6px 20px -4px var(--accent-glow);
     }
+    .chip.on .p2 { color: var(--accent-ink); border-color: currentColor; }
+
+    /* Players (1 or 2) */
+    .players { display: flex; flex-direction: column; gap: 10px; }
+    .players-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .pboxes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pbox {
+      min-width: 0;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      border-radius: 14px;
+      padding: 8px 12px 10px;
+      transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+      opacity: 0.7;
+    }
+    .pbox.turn { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+    .pbox .pturn {
+      font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--accent); visibility: hidden; height: 14px;
+    }
+    .pbox.turn .pturn { visibility: visible; }
+    .pbox input {
+      width: 100%; border: 0; padding: 2px 0; background: transparent; color: var(--fg);
+      font: inherit; font-weight: 800; font-size: 15px; outline: none;
+      border-bottom: 1px dashed transparent;
+    }
+    .pbox input:focus { border-bottom-color: var(--accent); }
+    .pbox .pcount { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .pbox .plast { font-size: 13px; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* Main 2-Column Grid */
     .workspace {
@@ -1908,25 +1970,14 @@
       </div>
     </header>
 
-    <!-- Game Navigation Ribbon -->
-    <div class="games-wrap">
-      <nav class="games" aria-label="Games" id="games">
-        <button class="chip" data-game="wheel"><span class="ico" aria-hidden="true">🎡</span><span class="gname"></span></button>
-        <button class="chip" data-game="knockout"><span class="ico" aria-hidden="true">💥</span><span class="gname"></span></button>
-        <button class="chip" data-game="race"><span class="ico" aria-hidden="true">🏁</span><span class="gname"></span></button>
-        <button class="chip" data-game="scratch"><span class="ico" aria-hidden="true">🎫</span><span class="gname"></span></button>
-        <button class="chip" data-game="scard"><span class="ico" aria-hidden="true">🎟️</span><span class="gname"></span></button>
-        <button class="chip" data-game="teams"><span class="ico" aria-hidden="true">👥</span><span class="gname"></span></button>
-        <button class="chip" data-game="order"><span class="ico" aria-hidden="true">🔢</span><span class="gname"></span></button>
-        <button class="chip" data-game="slots"><span class="ico" aria-hidden="true">🎰</span><span class="gname"></span></button>
-        <button class="chip" data-game="three"><span class="ico" aria-hidden="true">🃏</span><span class="gname"></span></button>
-        <button class="chip" data-game="cards"><span class="ico" aria-hidden="true">🎴</span><span class="gname"></span></button>
-        <button class="chip" data-game="bottle"><span class="ico" aria-hidden="true">🍾</span><span class="gname"></span></button>
-        <button class="chip" data-game="boxes"><span class="ico" aria-hidden="true">🎁</span><span class="gname"></span></button>
-        <button class="chip" data-game="dice"><span class="ico" aria-hidden="true">🎲</span><span class="gname"></span></button>
-        <button class="chip" data-game="coin"><span class="ico" aria-hidden="true">🪙</span><span class="gname"></span></button>
-        <button class="chip" data-game="number"><span class="ico" aria-hidden="true">#️⃣</span><span class="gname"></span></button>
-      </nav>
+    <!-- Game selector bar (opens the side panel) -->
+    <div class="game-bar">
+      <button class="game-open" id="gameOpenBtn" aria-haspopup="dialog" aria-controls="gameDrawer">
+        <span class="burger" aria-hidden="true">☰</span>
+        <span class="ico" id="curGameIco" aria-hidden="true">🎡</span>
+        <span class="cur" id="curGameName">Wheel</span>
+        <span class="more" id="allGamesLbl">All games</span>
+      </button>
     </div>
 
     <!-- Main 2-Column Workspace -->
@@ -1946,6 +1997,20 @@
             <button data-speed="fast">Fast</button>
             <button data-speed="normal" class="on">Normal</button>
             <button data-speed="suspense">Suspense</button>
+          </div>
+        </div>
+
+        <div class="players" id="playersBar" hidden>
+          <div class="players-top">
+            <div class="speed-seg" role="group" aria-label="Players" id="playersSeg">
+              <button data-players="1">1</button>
+              <button data-players="2">2</button>
+            </div>
+            <button class="btn small" id="pReset" hidden>Reset</button>
+          </div>
+          <div class="pboxes" id="pboxes" hidden>
+            <div class="pbox" id="pbox0"><div class="pturn"></div><input maxlength="20" aria-label="Player 1 name"><div class="plast"></div><div class="pcount"></div></div>
+            <div class="pbox" id="pbox1"><div class="pturn"></div><input maxlength="20" aria-label="Player 2 name"><div class="plast"></div><div class="pcount"></div></div>
           </div>
         </div>
 
@@ -2216,6 +2281,32 @@
     </main>
   </div>
 
+  <!-- Games side panel -->
+  <div class="drawer-bg" id="drawerBg" hidden></div>
+  <aside class="drawer" id="gameDrawer" aria-labelledby="drawerTitle" aria-hidden="true" inert>
+    <div class="drawer-head">
+      <h2 id="drawerTitle">Games</h2>
+      <button class="ctrl-btn" id="drawerClose" aria-label="Close">✕</button>
+    </div>
+    <nav class="games" aria-label="Games" id="games">
+        <button class="chip" data-game="wheel"><span class="ico" aria-hidden="true">🎡</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="knockout"><span class="ico" aria-hidden="true">💥</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="race"><span class="ico" aria-hidden="true">🏁</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="scratch"><span class="ico" aria-hidden="true">🎫</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="scard"><span class="ico" aria-hidden="true">🎟️</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="teams"><span class="ico" aria-hidden="true">👥</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="order"><span class="ico" aria-hidden="true">🔢</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="slots"><span class="ico" aria-hidden="true">🎰</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="three"><span class="ico" aria-hidden="true">🃏</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="cards"><span class="ico" aria-hidden="true">🎴</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="bottle"><span class="ico" aria-hidden="true">🍾</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="boxes"><span class="ico" aria-hidden="true">🎁</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="dice"><span class="ico" aria-hidden="true">🎲</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="coin"><span class="ico" aria-hidden="true">🪙</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+        <button class="chip" data-game="number"><span class="ico" aria-hidden="true">#️⃣</span><span class="gname"></span><span class="p2" hidden>2P</span></button>
+    </nav>
+  </aside>
+
   <!-- Celebratory Winner Modal -->
   <div class="overlay" id="overlay" hidden>
     <canvas id="confettiCv" aria-hidden="true"></canvas>
@@ -2284,6 +2375,9 @@
           scratchHere: "SCRATCH HERE", scratchSub: "Rub to reveal the winner", winner: "Winner",
           scardPick: "Choose one card", scardScratch: "Scratch your card to see what you chose", yourCard: "Your card",
           scardWait: "Tap SHUFFLE & HIDE first",
+          gamesTitle: "Games", allGames: "All games", onePlayer: "👤 1 player", twoPlayers: "👥 2 players",
+          pDefault: ["Player 1", "Player 2"], turnLbl: "Your turn", picksN: (n) => n + (n === 1 ? " pick" : " picks"),
+          noneYet: "No picks yet", nextTurn: (n) => "Next: " + n, resetPlayers: "Reset", closeLbl2: "Close",
           spinning: "Spinning…", rolling: "Rolling…", shuffling: "Shuffling…", mixing: "Mixing…",
           flipping: "Flipping…", picking: "Picking…", makingTeams: "Making teams…",
           offRace: "And they're off!", rememberCards: "Remember the cards…", pickACard: "Which one? Tap a card.",
@@ -2351,6 +2445,9 @@
           scratchHere: "اخدش هنا", scratchSub: "امسح الطبقة الفضية للكشف", winner: "الفائز",
           scardPick: "اختر بطاقة واحدة", scardScratch: "اكشط بطاقتك لترى ما اخترت", yourCard: "بطاقتك",
           scardWait: "اضغط اخلط وأخفِ أولاً",
+          gamesTitle: "الألعاب", allGames: "كل الألعاب", onePlayer: "👤 لاعب واحد", twoPlayers: "👥 لاعبان",
+          pDefault: ["اللاعب 1", "اللاعب 2"], turnLbl: "دورك", picksN: (n) => "عدد السحبات: " + n,
+          noneYet: "لا شيء بعد", nextTurn: (n) => "التالي: " + n, resetPlayers: "تصفير", closeLbl2: "إغلاق",
           spinning: "جارٍ الدوران…", rolling: "جارٍ السحب…", shuffling: "جارٍ الخلط…", mixing: "جارٍ التحريك…",
           flipping: "جارٍ الرمي…", picking: "جارٍ الاختيار…", makingTeams: "جارٍ توزيع الفرق…",
           offRace: "انطلق السباق!", rememberCards: "تذكر أماكن البطاقات…", pickACard: "أي بطاقة؟ اضغط لاختيار واحدة.",
@@ -2409,8 +2506,14 @@
         teamCount: 2,
         coinTally: { h: 0, t: 0 },
         numMin: 1,
-        numMax: 100
+        numMax: 100,
+        players: 1,
+        turn: 0,
+        pnames: ["", ""],
+        pres: [[], []]
       };
+      // Games where 2 players can take turns
+      const TWO_P = new Set(["wheel", "race", "scratch", "scard", "slots", "three", "cards", "bottle", "boxes", "dice", "coin", "number"]);
 
       let ko = [], koOut = [];
       let rot = 0, bottleRot = 0, busy = false, lastWin = null, bottleHit = -1;
@@ -2432,6 +2535,17 @@
       function stageOf(g) { return g === "knockout" ? "wheel" : g; }
       function itemWeight(it) { return Math.max(1, Math.min(3, Number(it.weight) || 1)); }
       function speedMult() { return SPEED_MULT[state.speed] || 1; }
+
+      function fixPlayers() {
+        state.players = state.players === 2 ? 2 : 1;
+        state.turn = state.turn === 1 ? 1 : 0;
+        if (!Array.isArray(state.pnames) || state.pnames.length !== 2) state.pnames = ["", ""];
+        state.pnames = state.pnames.map((n) => String(n || "").slice(0, 20));
+        if (!Array.isArray(state.pres) || state.pres.length !== 2) state.pres = [[], []];
+        state.pres = state.pres.map((r) => (Array.isArray(r) ? r.map(String).slice(0, 30) : []));
+      }
+      function twoOn(g) { return state.players === 2 && TWO_P.has(g || state.game); }
+      function pname(i) { return (state.pnames[i] || "").trim() || t().pDefault[i]; }
 
       function save() {
         try { localStorage.setItem(KEY_V2, JSON.stringify(state)); }
@@ -2466,6 +2580,7 @@
             if (!I18N[state.lang]) state.lang = "en";
             if (!SPEED_MULT[state.speed]) state.speed = "normal";
             if (!Array.isArray(state.history)) state.history = [];
+            fixPlayers();
             return;
           }
           // Migrate v1 seamlessly if present
@@ -3637,10 +3752,42 @@
         const now = new Date();
         const hh = String(now.getHours()).padStart(2, "0");
         const mm = String(now.getMinutes()).padStart(2, "0");
-        state.history.unshift({ id: uid(), label: text, game, time: hh + ":" + mm });
+        let who = null;
+        if (twoOn(game)) {
+          who = state.turn;
+          state.pres[who].unshift(text);
+          state.pres[who] = state.pres[who].slice(0, 30);
+          state.turn = 1 - who;
+        }
+        state.history.unshift({ id: uid(), label: who === null ? text : pname(who) + ": " + text, game, time: hh + ":" + mm });
         state.history = state.history.slice(0, 60);
+        if (who !== null) {
+          paintPlayers();
+          setStatus(pname(who) + ": " + text + " · " + t().nextTurn(pname(state.turn)));
+        }
+        return who;
       }
-      function logWinner(item, game) { logResult(label(item), game); }
+      function logWinner(item, game) { return logResult(label(item), game); }
+
+      function paintPlayers() {
+        const can = TWO_P.has(state.game), on = state.players === 2;
+        $("playersBar").hidden = !can;
+        document.querySelectorAll("[data-players]").forEach((b) => {
+          b.textContent = b.dataset.players === "2" ? t().twoPlayers : t().onePlayer;
+          b.classList.toggle("on", +b.dataset.players === state.players);
+        });
+        $("pboxes").hidden = !on; $("pReset").hidden = !on;
+        $("pReset").textContent = t().resetPlayers;
+        [0, 1].forEach((i) => {
+          const box = $("pbox" + i), inp = box.querySelector("input"), r = state.pres[i];
+          box.classList.toggle("turn", state.turn === i);
+          if (document.activeElement !== inp) inp.value = state.pnames[i] || "";
+          inp.placeholder = t().pDefault[i];
+          box.querySelector(".pturn").textContent = t().turnLbl;
+          box.querySelector(".plast").textContent = r.length ? r[0] : t().noneYet;
+          box.querySelector(".pcount").textContent = t().picksN(r.length);
+        });
+      }
 
       function finishWin(win) {
         busy = false;
@@ -3648,10 +3795,10 @@
         const item = arr[win];
         if (!item) return;
         lastWin = { item, index: win, removed: false };
-        logWinner(item, state.game);
+        const who = logWinner(item, state.game);
         fanfare();
 
-        $("winLabel").textContent = gMeta(state.game).picked;
+        $("winLabel").textContent = who === null ? gMeta(state.game).picked : pname(who) + " · " + gMeta(state.game).picked;
         $("winText").textContent = label(item);
         const img = $("winImg");
         if (item.type === "photo") { img.src = item.value; img.hidden = false; $("winText").hidden = !item.name; }
@@ -3669,6 +3816,11 @@
         }
         $("againBtn").textContent = arr.length ? t().playAgain : t().done;
         setStatus(t().lastPick(label(item)));
+        if (who !== null) {
+          const nx = t().nextTurn(pname(state.turn));
+          $("winNote").textContent = $("winNote").textContent ? $("winNote").textContent + " · " + nx : nx;
+          setStatus(pname(who) + ": " + label(item) + " · " + nx);
+        }
         save(); render();
         $("overlay").hidden = false;
         launchConfetti();
@@ -3722,11 +3874,11 @@
         document.querySelectorAll("[data-game]").forEach((b) => {
           const on = b.dataset.game === g;
           b.classList.toggle("on", on);
-          if (on) {
-            b.setAttribute("aria-current", "true");
-            if (!initial) b.scrollIntoView({ block: "nearest", inline: "center", behavior: reduceMotion() ? "auto" : "smooth" });
-          } else b.removeAttribute("aria-current");
+          if (on) b.setAttribute("aria-current", "true");
+          else b.removeAttribute("aria-current");
         });
+        paintGameBar();
+        paintPlayers();
 
         updateLayoutVisibility();
         bottleHit = -1;
@@ -3745,6 +3897,27 @@
         refreshAction();
         resize();
         if (g === "scratch") newTicket();
+      }
+
+      function paintGameBar() {
+        $("curGameIco").textContent = ICONS[state.game];
+        $("curGameName").textContent = gMeta(state.game).title;
+      }
+
+      function openDrawer() {
+        if (busy) return;
+        const d = $("gameDrawer");
+        d.inert = false; d.setAttribute("aria-hidden", "false"); d.classList.add("open");
+        $("drawerBg").hidden = false;
+        const cur = d.querySelector(".chip.on");
+        if (cur) { cur.scrollIntoView({ block: "nearest" }); cur.focus({ preventScroll: true }); }
+      }
+      function closeDrawer() {
+        const d = $("gameDrawer");
+        if (!d.classList.contains("open")) return;
+        d.classList.remove("open"); d.inert = true; d.setAttribute("aria-hidden", "true");
+        $("drawerBg").hidden = true;
+        $("gameOpenBtn").focus({ preventScroll: true });
       }
 
       function onListChanged() {
@@ -3791,7 +3964,13 @@
 
         document.querySelectorAll("[data-game]").forEach((b) => {
           b.querySelector(".gname").textContent = tr.games[b.dataset.game].title;
+          b.querySelector(".p2").hidden = !TWO_P.has(b.dataset.game);
         });
+        $("drawerTitle").textContent = tr.gamesTitle;
+        $("allGamesLbl").textContent = tr.allGames;
+        $("drawerClose").setAttribute("aria-label", tr.closeLbl2);
+        paintGameBar();
+        paintPlayers();
         document.querySelectorAll("[data-speed]").forEach((b) => {
           b.textContent = tr.speed[b.dataset.speed];
           b.classList.toggle("on", b.dataset.speed === state.speed);
@@ -4267,7 +4446,19 @@
       $("tabPicked").onclick = () => { activeTab = "picked"; render(); };
       $("tabHistory").onclick = () => { activeTab = "history"; render(); };
 
-      document.querySelectorAll("[data-game]").forEach((b) => { b.onclick = () => showGame(b.dataset.game); });
+      document.querySelectorAll("[data-game]").forEach((b) => { b.onclick = () => { showGame(b.dataset.game); closeDrawer(); }; });
+      $("gameOpenBtn").onclick = openDrawer;
+      $("drawerClose").onclick = closeDrawer;
+      $("drawerBg").onclick = closeDrawer;
+      document.querySelectorAll("[data-players]").forEach((b) => {
+        b.onclick = () => { if (busy) return; state.players = +b.dataset.players; save(); paintPlayers(); };
+      });
+      [0, 1].forEach((i) => {
+        const inp = $("pbox" + i).querySelector("input");
+        inp.addEventListener("input", () => { state.pnames[i] = inp.value.slice(0, 20); save(); });
+        inp.addEventListener("keydown", (e) => { if (e.key === "Enter") inp.blur(); });
+      });
+      $("pReset").onclick = () => { state.pres = [[], []]; state.turn = 0; save(); paintPlayers(); };
       document.querySelectorAll("[data-teams]").forEach((b) => {
         b.onclick = () => { if (!busy) { state.teamCount = +b.dataset.teams; save(); teamsPlaceholder(); refreshAction(); } };
       });
@@ -4310,7 +4501,10 @@
         closePopup();
       };
       $("overlay").onclick = (e) => { if (e.target.id === "overlay") closePopup(); };
-      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("overlay").hidden) closePopup(); });
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (!$("overlay").hidden) closePopup(); else closeDrawer();
+      });
 
       // Boot
       load();

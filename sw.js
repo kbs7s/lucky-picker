@@ -1,5 +1,5 @@
 // Lucky Picker offline cache. Bump VERSION when index.html changes.
-const VERSION = 'lp-v2';
+const VERSION = 'lp-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'];
 
